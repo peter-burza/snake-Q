@@ -1,7 +1,7 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-
+// changes
 // GAME OBJECT DECLARATION
 const game = {
   width: 20,
