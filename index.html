@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewpoint" content="width=device-width, initial-scale=1.0"/>
+        <title>SNAKE | CANVAS_GAME</title>
+        <link rel="stylesheet" href="style.css" type="text/css">
+    </head>
+    <body>
+        <div class="menu">
+            <p class="pausePlay">Play / Pause - " P "</p>
+            <button id="reset">Reset</button>
+        </div>
+        <div class="info">
+            <p>Score: <span id="score">0</span></p>
+            <p>Highscore: <span id="highscore">0</span></p>
+            <button id="highScoreReset">Reset High Score</button>
+        </div>
+        <div class="settings">
+            <p>Starting Direction: <span id="startingDirection"></span></p>
+        </div>
+        <canvas id="canvas"></canvas>
+        <script type='module' src="js/master.js"></script>
+    </body>
+
+</html>

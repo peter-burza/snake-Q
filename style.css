@@ -1,0 +1,35 @@
+#canvas {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #cbd6cb;
+    border: 10px black solid;
+}
+
+.menu {
+    position: absolute;
+    left: 50%;
+    top: 20%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.info {
+    position: absolute;
+    left: 20%;
+    top: 10%;
+    transform: translate(-50%, -50%);
+}
+
+.pausePlay {
+    text-align: center;
+}
+
+.settings {
+    position: absolute;
+    left: 80%;
+    top: 10%;
+    transform: translate(-50%, -50%);
+}
