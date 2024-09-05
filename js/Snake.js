@@ -1,5 +1,5 @@
 import Moveable from './Moveable.js';
-import { GAMEFIELD_WIDTH, GAMEFIELD_HEIGHT } from './config.js'
+import { GAMEFIELD_WIDTH, GAMEFIELD_HEIGHT, GAME_MODE } from './config.js'
 
 export default class Snake extends Moveable {
   x;
@@ -24,7 +24,7 @@ export default class Snake extends Moveable {
     const rndFreePos = this.getRndFreePos(gameField.field); 
     this.x = rndFreePos.x;
     this.y = rndFreePos.y;
-    gameField.update();
+    //gameField.update();
   };
   
   // ----------------- MOVEMENT ----------------- //
@@ -154,25 +154,24 @@ export default class Snake extends Moveable {
           }
         }
       }
-    }
-
-    // WALL/SNAKE COLLISION
-    if (type === 'wall' || type === 'infinite') {
+    } else {
+      // WALL/SNAKE COLLISION
       if (
         this.x >= GAMEFIELD_WIDTH - 1 && this.actualDir === this.directions.right || // right - kontroluje ci je prava strana kocky hlavy hada na pravej stene a zaroven dalsi smer pohybu hada je vpravo, cize koliduje
         this.x <= 0 && this.actualDir === this.directions.left || // left
         this.y >= GAMEFIELD_HEIGHT - 1 && this.actualDir === this.directions.down || // down
         this.y <= 0 && this.actualDir === this.directions.up // up
       )  {
-        if (type === 'wall') {this.alive = false; console.log('wall coll detected.');}
-        if (type === 'infinite') {this.wallPassed = true; console.log('wall pass detected.');}
+        if (GAME_MODE === 'wall') {this.alive = false; console.log('wall coll detected.');}
+        if (GAME_MODE === 'infinite') {this.wallPassed = true; console.log('wall pass detected.');}
       }
     }
+    
   };
 
-  hasColided(wallMode) {
+  hasColided() {
     // SNAKE/WALL COLLISION
-    this.collisionCheck(null, wallMode);
+    this.collisionCheck(null);
 
     //SNAKE/SNAKE COLLISION
     this.collisionCheck(this.joints, 'snake');

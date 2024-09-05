@@ -11,18 +11,15 @@ export default class Food extends Drawable {
   };
 
   assignPosition(gameField) {
-    this.list[0] = this.getRndFreePos(gameField.field);
-    gameField.update();
+    this.list[0] = this.getRndFreePos(gameField);
+    //gameField.update();
     
   }
 
   // UPDATE FOOD POSITION
-  updatePos(gameField) {
-    if (this.eaten) {
-      const newRndPos = this.getRndFreePos(gameField);
-      this.list[0].x = newRndPos.x;
-      this.list[0].y = newRndPos.y;
+  updatePos(newPosition) {
+      this.list[0].x = newPosition.x;
+      this.list[0].y = newPosition.y;
       this.eaten = false;
-    }
   };
 }
