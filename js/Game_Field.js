@@ -1,11 +1,17 @@
 import { BLOCK_SIZE, GAMEFIELD_WIDTH, GAMEFIELD_HEIGHT } from './config.js'
-import Drawable from './Drawable.js'
+import { getRndNum } from './Global_Functions.js'
 
-export default class GameField extends Drawable {
+export default class GameField {
   field
   constructor() {
-    super()
     this.offset = BLOCK_SIZE / 10
+
+    /* GET CANVAS CONTEXT */
+    this.canvas = document.getElementById("canvas");
+    this.ctx = this.canvas.getContext("2d");
+    /* CANVAS STYLE DECLARATION */
+    this.canvas.width = GAMEFIELD_WIDTH * BLOCK_SIZE;
+    this.canvas.height = GAMEFIELD_HEIGHT * BLOCK_SIZE;
     
     //Create Game Field
     this.fillGameField()
@@ -64,5 +70,15 @@ export default class GameField extends Drawable {
   
   px(num) { // returns the position in pixels
     return num * BLOCK_SIZE
+  }
+
+  // GET RANDOM FREE POSITION IN CANVAS
+  getRndFreePos() {
+    let rndNum = '';
+    do {
+      rndNum = getRndNum(0, this.field.length - 1);
+    } while (this.field[rndNum].info !== 'free')
+    const rndPos = { x: this.field[rndNum].x, y: this.field[rndNum].y };
+    return rndPos;
   }
 }

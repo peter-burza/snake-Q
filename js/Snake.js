@@ -2,29 +2,22 @@ import Moveable from './Moveable.js';
 import { GAMEFIELD_WIDTH, GAMEFIELD_HEIGHT, GAME_MODE } from './config.js'
 
 export default class Snake extends Moveable {
-  x;
-  y;
-  constructor(food, gameField) {
+  position = {x: null, y: null};
+  constructor() {
     super();
-    // position of left-top corner of the snake head block
-    this.assignPosition(gameField);
-    // other properties
     this.alive = true;
     this.color = "black";
-    this.wallPassed = false
+    this.wallTeleport = false
     this.dirList = [];
     this.joints = []; // array to store all joints of the snake
-
-    this.food = food;
     
     window.addEventListener('keydown', this.addDirectionToQueue.bind(this));
   };
   
-  assignPosition(gameField) {
-    const rndFreePos = this.getRndFreePos(gameField.field); 
-    this.x = rndFreePos.x;
-    this.y = rndFreePos.y;
-    //gameField.update();
+  assignPosition(newPosition) {
+    const rndFreePos = newPosition; 
+    this.position.x = rndFreePos.x;
+    this.position.y = rndFreePos.y;
   };
   
   // ----------------- MOVEMENT ----------------- //
@@ -68,20 +61,20 @@ export default class Snake extends Moveable {
     // UPDATE POS OF ALL JOINTS [poloha metody updateJointsPos je tu lebo po zmene 'pos of head' uz jej pozicia nie je znama]
     this.updateJointsPos();
 
-    if (this.wallPassed) {
-      this.wallPassed = false;
+    if (this.wallTeleport) {
+      this.wallTeleport = false;
       switch (this.actualDir) {
         case this.directions.up:
-          this.y = 14;
+          this.position.y = 14;
           break;
         case this.directions.down:
-          this.y = 0;
+          this.position.y = 0;
           break;
         case this.directions.left:
-          this.x = 19;
+          this.position.x = 19;
           break;
         case this.directions.right:
-          this.x = 0;
+          this.position.x = 0;
           break;
       }
       return;
@@ -90,16 +83,16 @@ export default class Snake extends Moveable {
     // UPDATE POS OF HEAD
     switch (this.actualDir) {
       case this.directions.up:
-        this.y -= 1;
+        this.position.y -= 1;
         break;
       case this.directions.down:
-        this.y += 1;
+        this.position.y += 1;
         break;
       case this.directions.left:
-        this.x -= 1;
+        this.position.x -= 1;
         break;
       case this.directions.right:
-        this.x += 1;
+        this.position.x += 1;
         break;
     }
   };
@@ -113,74 +106,16 @@ export default class Snake extends Moveable {
 
     // update the position of the first joint
     if (this.joints.length > 0) {
-      this.joints[0].x = this.x;
-      this.joints[0].y = this.y;
+      this.joints[0].x = this.position.x;
+      this.joints[0].y = this.position.y;
     }
   };
 
   addJoint() {
     if (this.joints.length === 0) {
-      this.joints.push({ x: this.x, y: this.y });
+      this.joints.push({ x: this.position.x, y: this.position.y });
       return;
     }
     this.joints.push({ x: this.joints[this.joints.length - 1].x, y: this.joints[this.joints.length - 1].y });
   };
-
-  
-  // ------------ COLLISION CHECK ------------ //
-  collisionCheck(array, type) {
-    if (type === 'snake' || type === 'food') {      
-      for (let i = 0; i < array.length; i++) {
-        if (this.y === array[i].y) { // vnorene dve podmienky budu relevantne iba ak je splnena aktualna podmienka
-          if (
-            this.x + 1 === array[i].x && this.actualDir === this.directions.right || // right
-            this.x - 1 === array[i].x && this.actualDir === this.directions.left  || // left
-            this.x - (GAMEFIELD_WIDTH - 1) === array[i].x && this.actualDir === this.directions.right || // right - wall pass
-            this.x + (GAMEFIELD_WIDTH - 1) === array[i].x && this.actualDir === this.directions.left     // left - wall pass
-          ) {
-            if (type === 'snake') this.alive = false;
-            if (type === 'food') this.food.eaten = true;
-          }
-        }
-        if (this.x === array[i].x) { // vnorene dve podmienky budu relevantne iba ak je splnena aktualna podmienka
-          if (
-            this.y - 1 === array[i].y && this.actualDir === this.directions.up ||  // up
-            this.y + 1 === array[i].y && this.actualDir === this.directions.down ||   // down
-            this.y + (GAMEFIELD_HEIGHT - 1) === array[i].y && this.actualDir === this.directions.up ||   // up - wall pass
-            this.y - (GAMEFIELD_HEIGHT - 1) === array[i].y && this.actualDir === this.directions.down   // down - wall pass
-          ) {
-            if (type === 'snake') this.alive = false;
-            if (type === 'food') this.food.eaten = true;
-          }
-        }
-      }
-    } else {
-      // WALL/SNAKE COLLISION
-      if (
-        this.x >= GAMEFIELD_WIDTH - 1 && this.actualDir === this.directions.right || // right - kontroluje ci je prava strana kocky hlavy hada na pravej stene a zaroven dalsi smer pohybu hada je vpravo, cize koliduje
-        this.x <= 0 && this.actualDir === this.directions.left || // left
-        this.y >= GAMEFIELD_HEIGHT - 1 && this.actualDir === this.directions.down || // down
-        this.y <= 0 && this.actualDir === this.directions.up // up
-      )  {
-        if (GAME_MODE === 'wall') {this.alive = false; console.log('wall coll detected.');}
-        if (GAME_MODE === 'infinite') {this.wallPassed = true; console.log('wall pass detected.');}
-      }
-    }
-    
-  };
-
-  hasColided() {
-    // SNAKE/WALL COLLISION
-    this.collisionCheck(null);
-
-    //SNAKE/SNAKE COLLISION
-    this.collisionCheck(this.joints, 'snake');
-
-    // SNAKE/FOOD COLLISION
-    this.collisionCheck(this.food.list, 'food');
-  };
-
-  getNewStartingPosition() {
-    
-  }
 }

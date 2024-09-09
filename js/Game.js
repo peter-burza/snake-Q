@@ -1,4 +1,4 @@
-import { GAME_MODE } from './config.js'
+import { GAME_MODE, GAMEFIELD_WIDTH, GAMEFIELD_HEIGHT} from './config.js'
 import GameField from './Game_Field.js'
 import Snake from './Snake.js'
 import Food from './Food.js'
@@ -13,8 +13,8 @@ export default class Game {
   constructor() {
     // CLASS REFERENCES
     this.gameField = new GameField()
-    this.food = new Food(this.gameField.field)
-    this.snake = new Snake(this.food, this.gameField)
+    this.food = new Food()
+    this.snake = new Snake()
     // EVENT LISTENERS
     window.addEventListener('keydown', (event) => this.togglePlayPause(event))
     document.getElementById("highScoreReset").addEventListener("click", () => this.resetHighScore())
@@ -22,17 +22,34 @@ export default class Game {
   }
 
   init() {
-    // GAMEPLAY
     this.isPlaying = false
-    // SPEED
+    // MANAGE SPEED
     this.speed = 200
-    this.score = 0
     this.speedIncrement = 30
+    // MANAGE SCORE
+    this.score = 0
     this.loadHighScore()
     this.refreshScore()
-    this.gameField.init(this.snake.x, this.snake.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
+    // ASSIGN NEW POSITIONS
+    this.food.assignPosition(this.gameField.getRndFreePos());
+    this.snake.assignPosition(this.gameField.getRndFreePos());
+    this.gameField.init(this.snake.position.x, this.snake.position.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
     document.getElementById("startingDirection").innerHTML = Object.keys(this.snake.directions).find(key => this.snake.directions[key] === this.snake.actualDir)
-    console.log(this.food.list)
+  }
+
+  resetGame() {
+    this.gameField.fillGameField()
+    this.food = new Food()
+    this.snake = new Snake(this.food, this.gameField)
+    this.score = 0
+    this.refreshScore()
+    this.food.assignPosition(this.gameField.getRndFreePos());
+    this.snake.assignPosition(this.gameField.getRndFreePos());
+    this.gameField.init(this.snake.position.x, this.snake.position.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
+    this.isPlaying = false
+    document.getElementById("startingDirection").innerHTML = Object.keys(this.snake.directions).find(key => this.snake.directions[key] === this.snake.actualDir)
+    clearInterval(this.gameInterval)
+    this.gameInterval = setInterval(() => this.loop(), this.speed)
   }
   
   togglePlayPause(event) {
@@ -54,20 +71,6 @@ export default class Game {
     clearInterval(this.gameInterval)
   }
 
-  resetGame() {
-    this.gameField.fillGameField()
-    this.food = new Food(this.gameField)
-    this.snake = new Snake(this.food, this.gameField)
-    this.score = 0
-    this.refreshScore()
-    this.gameField.init(this.snake, this.food)
-    this.isPlaying = false
-    document.getElementById("startingDirection").innerHTML = Object.keys(this.snake.directions).find(key => this.snake.directions[key] === this.snake.actualDir)
-    clearInterval(this.gameInterval)
-    this.gameInterval = setInterval(() => this.loop(), this.speed)
-    //this.init()
-  }
-
   // --- GAME LOOP --- //
   loop() {
     // GAME STATE
@@ -76,9 +79,13 @@ export default class Game {
     // SET SNAKE DIRECTION
     this.snake.tryChangeDirection()
     
-    // CHECK FOR COLLISIONS
-    this.snake.hasColided(GAME_MODE)
-
+    // SNAKE/WALL MEET
+    this.checkWallMeet()
+    //SNAKE/SNAKE COLLISION
+    if (this.snake.joints.some((joint) => { return this.collisionCheck(this.snake.position, {x: joint.x, y: joint.y}, this.snake.actualDir)})) this.snake.alive = false;
+    // SNAKE/FOOD COLLISION
+    if (this.food.list.some((food) => { return this.collisionCheck(this.snake.position, {x: food.x, y: food.y}, this.snake.actualDir)})) this.food.eaten = true;
+    
     // CHECKING IF IT IS GAME OVER
     if (!this.snake.alive) {
       this.gameOver()
@@ -90,9 +97,8 @@ export default class Game {
     
     // UPDATE
     this.snake.updatePosition()
-    this.food.updatePos(this.food.getRndFreePos(this.gameField.field))
-    this.gameField.update(this.snake.x, this.snake.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
-console.log(this.food.list)
+    this.food.updatePos(this.gameField.getRndFreePos())
+    this.gameField.update(this.snake.position.x, this.snake.position.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
     // RENDER
     this.gameField.draw(this.snake.color, this.food.color)
 
@@ -140,6 +146,37 @@ console.log(this.food.list)
 
     if (this.score > this.highScore) {
       this.saveHighScore(this.score)
+    }
+  }
+
+  collisionCheck(pos1, pos2, actualSnakeDirection) {
+    if (pos1.y === pos2.y) { // vnorene dve podmienky budu relevantne iba ak je splnena aktualna podmienka
+      if (
+        pos1.x + 1 === pos2.x && actualSnakeDirection === this.snake.directions.right || // right
+        pos1.x - 1 === pos2.x && actualSnakeDirection === this.snake.directions.left     // left
+      ) return true
+    } else if (pos1.x === pos2.x) { // vnorene dve podmienky budu relevantne iba ak je splnena aktualna podmienka
+      if (
+        pos1.y - 1 === pos2.y && actualSnakeDirection === this.snake.directions.up ||  // up
+        pos1.y + 1 === pos2.y && actualSnakeDirection === this.snake.directions.down   // down
+      ) return true
+    }
+    return false
+  }
+
+  checkWallMeet() { // Checks if snake will collide/pass the wall, depends on the game mode
+    if (
+      this.snake.position.x >= GAMEFIELD_WIDTH - 1 && this.snake.actualDir === this.snake.directions.right || // right - kontroluje ci je prava strana kocky hlavy hada na pravej stene a zaroven dalsi smer pohybu hada je vpravo, cize koliduje
+      this.snake.position.x <= 0 && this.snake.actualDir === this.snake.directions.left || // left
+      this.snake.position.y >= GAMEFIELD_HEIGHT - 1 && this.snake.actualDir === this.snake.directions.down || // down
+      this.snake.position.y <= 0 && this.snake.actualDir === this.snake.directions.up // up
+    )  {
+      if (GAME_MODE === 'wall') {
+        this.snake.alive = false
+        return;
+      } else {
+        this.snake.wallTeleport = true;
+      }
     }
   }
 }
