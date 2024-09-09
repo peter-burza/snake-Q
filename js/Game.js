@@ -13,8 +13,10 @@ export default class Game {
   constructor() {
     // CLASS REFERENCES
     this.gameField = new GameField()
-    this.food = new Food()
-    this.snake = new Snake()
+    // GAME INIT
+    this.speed = 200
+    this.speedIncrement = 30
+    this.loadHighScore()
     // EVENT LISTENERS
     window.addEventListener('keydown', (event) => this.togglePlayPause(event))
     document.getElementById("highScoreReset").addEventListener("click", () => this.resetHighScore())
@@ -22,32 +24,21 @@ export default class Game {
   }
 
   init() {
-    this.isPlaying = false
-    // MANAGE SPEED
-    this.speed = 200
-    this.speedIncrement = 30
-    // MANAGE SCORE
-    this.score = 0
-    this.loadHighScore()
-    this.refreshScore()
     // ASSIGN NEW POSITIONS
-    this.food.assignPosition(this.gameField.getRndFreePos());
-    this.snake.assignPosition(this.gameField.getRndFreePos());
+    //this.food.resetSnake(this.gameField.getRndFreePos())
+    //this.snake.assignPosition(this.gameField.getRndFreePos())
+    this.food = new Food(this.gameField.getRndFreePos())
+    this.snake = new Snake()
     this.gameField.init(this.snake.position.x, this.snake.position.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
+    this.isPlaying = false
+    this.score = 0
+    this.refreshScore()
     document.getElementById("startingDirection").innerHTML = Object.keys(this.snake.directions).find(key => this.snake.directions[key] === this.snake.actualDir)
   }
 
   resetGame() {
     this.gameField.fillGameField()
-    this.food = new Food()
-    this.snake = new Snake(this.food, this.gameField)
-    this.score = 0
-    this.refreshScore()
-    this.food.assignPosition(this.gameField.getRndFreePos());
-    this.snake.assignPosition(this.gameField.getRndFreePos());
-    this.gameField.init(this.snake.position.x, this.snake.position.y, this.snake.joints, this.snake.color, this.food.list, this.food.color)
-    this.isPlaying = false
-    document.getElementById("startingDirection").innerHTML = Object.keys(this.snake.directions).find(key => this.snake.directions[key] === this.snake.actualDir)
+    this.init()
     clearInterval(this.gameInterval)
     this.gameInterval = setInterval(() => this.loop(), this.speed)
   }
