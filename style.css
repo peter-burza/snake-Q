@@ -1,29 +1,15 @@
 #canvas {
-    margin: 0;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #cbd6cb;
+    background-color: #cecece;
     border: 10px black solid;
 }
 
-.menu {
-    position: absolute;
-    left: 50%;
-    top: 20%;
-    transform: translate(-50%, -50%);
+.canvas {
+    margin: 10% auto;
     text-align: center;
 }
 
-.info {
-    position: absolute;
-    left: 20%;
-    top: 10%;
-    transform: translate(-50%, -50%);
-}
-
-.pausePlay {
+.menu {
+    margin: 10% auto;
     text-align: center;
 }
 
@@ -32,4 +18,27 @@
     left: 80%;
     top: 10%;
     transform: translate(-50%, -50%);
+}
+
+.score {
+    /* display: flex;
+    justify-content: space-between; */
+    width: 100%;
+    margin: 0 auto 0 auto;
+    text-align: center;
+    border-spacing: 15px;
+    /* add 25px of space between table rows */
+}
+
+body {
+    margin: 0 auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+}
+
+body {
+    overflow: hidden;
 }
